@@ -10,6 +10,23 @@ const connectDB = async () => {
     })
 }
 
+const todoSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    required: true
+  },
+  completed: {
+    type: Boolean,
+    default: false
+  }
+})
+
+const Todo = mongoose.model("Todo", todoSchema)
+
 const userSchema = new mongoose.Schema({
   username: {
     type: String,
@@ -35,26 +52,10 @@ const userSchema = new mongoose.Schema({
   refreshToken: String,
 }, { timestamps: true })
 
-const todoSchema = new mongoose.Schema({
-  title: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
-    required: true
-  },
-  completed: {
-    type: Boolean,
-    default: false
-  }
-})
-
-const Todo = mongoose.model("Todo", todoSchema)
 const User = mongoose.model("User", userSchema)
 
 module.exports = {
-  Todo,
   User,
+  Todo,
   connectDB
 }

@@ -5,24 +5,28 @@ const { createTodoType, updateTodoType } = require("../model/todoTypes");
 
 const getTodos = async (req, res) => {
   const todos = await Todo.find()
-  console.log(todos)
+  //////////////////////////////// console.log(todos)
   res.json({ todos })
 }
 
-const addTodo = async (req, res) => { // on adding todo add id to arr in User collection
+const addTodo = async (req, res) => { // TODO: on adding todo, add id to arr in User collection
   try {
-    const addTodo = req.body;
-    const parsedPayload = createTodoType.safeParse(addTodo);
+    const parsedPayload = createTodoType.safeParse(req.body);
     if (!parsedPayload.success) {
       return res.status(411).json({
         message: parsedPayload.error
       })
     }
 
-    const result = await Todo.create({
+    const newTodo = await Todo.create({
       title: parsedPayload.data.title,
       description: parsedPayload.data.description
     })
+
+    const user = await User.findById(req.userId)
+    console.log(user, user.todoList)
+    user.todoList.push(newTodo._id)
+    user.save()
 
     res.json({ message: "Todo created" })
   } catch (error) {
@@ -53,7 +57,7 @@ const updateTodoStatus = async (req, res) => {
     const updatedTodo = await Todo.findOneAndUpdate({
       _id: updateTodoId
     }, {
-      completed: true
+      completed: true                      // TODO: instead of marking true, mark whatever passed i.e. true or false
     })
 
     if (updatedTodo === null) res.json({ message: "Todo does not exist!" })
@@ -64,12 +68,16 @@ const updateTodoStatus = async (req, res) => {
   }
 }
 
-const deleteTodo = async (req, res) => { // on del todo, del id from arr in User collection
+const deleteTodo = async (req, res) => { // TODO: on del todo, del id from arr in User collection
   try {
     const todoToDelete = req.body.id
     const removedTodo = await Todo.findOneAndDelete({ _id: todoToDelete })
-
     if (removedTodo === null) return res.json({ message: "Todo deos not exist!" })
+
+    const user = await User.findById(req.userId)
+    user.todoList.filter(todoId => todoId.toString() !== todoToDelete)
+    user.save()
+    console.log("newUser", user)
 
     return res.json({ message: "Todo removed!" })
   } catch (err) {

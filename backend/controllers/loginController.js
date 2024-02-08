@@ -3,16 +3,16 @@ const { User } = require("../model/db")
 const bcrypt = require("bcrypt")
 const jwt = require('jsonwebtoken')
 
-const handleLogin = async () => {
+const handleLogin = async (req, res) => {
   const parsedData = loginUser.safeParse(req.body)
-  if (!parsedData.success) res.json({ message: parsedData.error })
+  if (!parsedData.success) return res.json({ message: parsedData.error })
 
-  const userExist = await User.findOne({ username: parsedData.data.username }).exec()
-  if (!userExist) res.status(404).json({ message: "User does not exist" })
+  const userExist = await User.findOne({ email: parsedData.data.email }).exec()
+  if (!userExist) return res.status(404).json({ message: "User does not exist" })
 
   try {
     const pwdMatch = await bcrypt.compare(parsedData.data.password, userExist.password)
-    if (!pwdMatch) res.status(401).json({ message: "Wrong password" })
+    if (!pwdMatch) return res.status(401).json({ message: "Wrong password" })
 
     const token = jwt.sign({ userId: userExist._id }, process.env.ACCESS_JWT_SECRET, { expiresIn: "1d" })
 
@@ -23,6 +23,7 @@ const handleLogin = async () => {
     res.json({ token })
 
   } catch (err) {
+    console.log(err)
     res.json({ Error: err })
   }
 }
