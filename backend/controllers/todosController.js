@@ -24,7 +24,6 @@ const addTodo = async (req, res) => { // TODO: on adding todo, add id to arr in 
     })
 
     const user = await User.findById(req.userId)
-    console.log(user, user.todoList)
     user.todoList.push(newTodo._id)
     user.save()
 
@@ -71,11 +70,13 @@ const updateTodoStatus = async (req, res) => {
 const deleteTodo = async (req, res) => { // TODO: on del todo, del id from arr in User collection
   try {
     const todoToDelete = req.body.id
-    const removedTodo = await Todo.findOneAndDelete({ _id: todoToDelete })
-    if (removedTodo === null) return res.json({ message: "Todo deos not exist!" })
+    // const removedTodo = await Todo.findOneAndDelete({ _id: todoToDelete })
+    // if (removedTodo === null) return res.json({ message: "Todo deos not exist!" })
 
     const user = await User.findById(req.userId)
-    user.todoList.filter(todoId => todoId.toString() !== todoToDelete)
+    user.todoList = user.todoList.filter(todoId => {
+      return todoId.toString() !== todoToDelete;
+    });
     user.save()
     console.log("newUser", user)
 
